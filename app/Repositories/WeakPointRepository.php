@@ -16,14 +16,14 @@ class WeakPointRepository implements WeakPointRepositoryInterface
                 categories.name as category_name,
                 categories.color,
                 COUNT(*)        as total,
-                SUM(CASE WHEN learning_records.is_correct = 1 THEN 1 ELSE 0 END) as correct
+                SUM(CASE WHEN learning_records.is_correct THEN 1 ELSE 0 END) as correct
             ')
             ->join('quizzes',    'learning_records.quiz_id',  '=', 'quizzes.id')
             ->join('terms',      'quizzes.term_id',           '=', 'terms.id')
             ->join('categories', 'terms.category_id',         '=', 'categories.id')
             ->where('learning_records.user_id', $userId)
             ->groupBy('terms.id', 'terms.name', 'categories.name', 'categories.color')
-            ->having('total', '>=', 2)
+            ->havingRaw('COUNT(*) >= 2')
             ->get()
             ->map(function ($row) {
                 $row->accuracy = $row->total > 0

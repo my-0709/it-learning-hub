@@ -29,7 +29,7 @@ class LearningRecordRepository implements LearningRecordRepositoryInterface
                 categories.name as category_name,
                 categories.color,
                 COUNT(*)        as total,
-                SUM(CASE WHEN learning_records.is_correct = 1 THEN 1 ELSE 0 END) as correct
+                SUM(CASE WHEN learning_records.is_correct THEN 1 ELSE 0 END) as correct
             ')
             ->join('quizzes',    'learning_records.quiz_id',   '=', 'quizzes.id')
             ->join('terms',      'quizzes.term_id',            '=', 'terms.id')
@@ -57,8 +57,8 @@ class LearningRecordRepository implements LearningRecordRepositoryInterface
     {
         return LearningRecord::where('user_id', $userId)
             ->selectRaw('DATE(answered_at) as date')
-            ->groupBy('date')
-            ->orderBy('date', 'desc')
+            ->groupByRaw('DATE(answered_at)')
+            ->orderByRaw('DATE(answered_at) DESC')
             ->pluck('date')
             ->toArray();
     }
