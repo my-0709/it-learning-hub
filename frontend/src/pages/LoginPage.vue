@@ -5,10 +5,11 @@ import { useAuthStore } from '@/stores/auth'
 
 const auth    = useAuthStore()
 const router  = useRouter()
-const email   = ref('')
-const password= ref('')
-const error   = ref('')
-const loading = ref(false)
+const email    = ref('')
+const password = ref('')
+const showPw   = ref(false)
+const error    = ref('')
+const loading  = ref(false)
 
 async function submit() {
   error.value   = ''
@@ -60,7 +61,12 @@ async function submit() {
           </div>
           <div>
             <label style="display:block;font-size:.85rem;font-weight:600;color:#334155;margin-bottom:.4rem;">パスワード</label>
-            <input v-model="password" type="password" class="input" placeholder="••••••••" required />
+            <div style="position:relative;">
+              <input v-model="password" :type="showPw ? 'text' : 'password'" class="input" placeholder="••••••••" required style="padding-right:2.75rem;" />
+              <button type="button" @click="showPw = !showPw" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:0;display:flex;align-items:center;" :title="showPw ? 'パスワードを隠す' : 'パスワードを表示'">
+                <span class="material-icons" style="font-size:1.2rem;">{{ showPw ? 'visibility_off' : 'visibility' }}</span>
+              </button>
+            </div>
           </div>
           <button type="submit" class="btn-primary" style="width:100%;justify-content:center;margin-top:.5rem;" :disabled="loading">
             <span v-if="loading" class="material-icons" style="font-size:1.1rem;animation:spin 1s linear infinite;">hourglass_empty</span>

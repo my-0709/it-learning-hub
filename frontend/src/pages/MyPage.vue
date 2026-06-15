@@ -85,6 +85,9 @@ const currentStatus = computed(() =>
 
 // ── パスワード変更 ─────────────────────────────────────
 const pw = reactive({ current_password: '', password: '', password_confirmation: '' })
+const showPwCurrent = ref(false)
+const showPwNew     = ref(false)
+const showPwConfirm = ref(false)
 const pwLoading = ref(false)
 const pwMsg     = ref<{ type: 'ok' | 'ng'; text: string } | null>(null)
 
@@ -126,8 +129,9 @@ async function handleReset() {
 }
 
 // ── 退会 ──────────────────────────────────────────────
-const del        = reactive({ password: '' })
-const delStep    = ref<'idle' | 'confirm'>('idle')
+const del           = reactive({ password: '' })
+const showDelPw     = ref(false)
+const delStep       = ref<'idle' | 'confirm'>('idle')
 const delLoading = ref(false)
 const delMsg     = ref('')
 
@@ -274,15 +278,30 @@ async function handleDelete() {
 
       <div class="form-group">
         <label class="form-label">現在のパスワード</label>
-        <input v-model="pw.current_password" type="password" class="input" placeholder="現在のパスワード" autocomplete="current-password" />
+        <div style="position:relative;">
+          <input v-model="pw.current_password" :type="showPwCurrent ? 'text' : 'password'" class="input" placeholder="現在のパスワード" autocomplete="current-password" style="padding-right:2.75rem;" />
+          <button type="button" @click="showPwCurrent = !showPwCurrent" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:0;display:flex;align-items:center;" :title="showPwCurrent ? 'パスワードを隠す' : 'パスワードを表示'">
+            <span class="material-icons" style="font-size:1.2rem;">{{ showPwCurrent ? 'visibility_off' : 'visibility' }}</span>
+          </button>
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">新しいパスワード（8文字以上）</label>
-        <input v-model="pw.password" type="password" class="input" placeholder="新しいパスワード" autocomplete="new-password" />
+        <div style="position:relative;">
+          <input v-model="pw.password" :type="showPwNew ? 'text' : 'password'" class="input" placeholder="新しいパスワード" autocomplete="new-password" style="padding-right:2.75rem;" />
+          <button type="button" @click="showPwNew = !showPwNew" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:0;display:flex;align-items:center;" :title="showPwNew ? 'パスワードを隠す' : 'パスワードを表示'">
+            <span class="material-icons" style="font-size:1.2rem;">{{ showPwNew ? 'visibility_off' : 'visibility' }}</span>
+          </button>
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">新しいパスワード（確認）</label>
-        <input v-model="pw.password_confirmation" type="password" class="input" placeholder="もう一度入力" autocomplete="new-password" />
+        <div style="position:relative;">
+          <input v-model="pw.password_confirmation" :type="showPwConfirm ? 'text' : 'password'" class="input" placeholder="もう一度入力" autocomplete="new-password" style="padding-right:2.75rem;" />
+          <button type="button" @click="showPwConfirm = !showPwConfirm" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:0;display:flex;align-items:center;" :title="showPwConfirm ? 'パスワードを隠す' : 'パスワードを表示'">
+            <span class="material-icons" style="font-size:1.2rem;">{{ showPwConfirm ? 'visibility_off' : 'visibility' }}</span>
+          </button>
+        </div>
       </div>
 
       <div v-if="pwMsg" :class="['msg-box', pwMsg.type === 'ok' ? 'msg-ok' : 'msg-ng']">
@@ -355,7 +374,12 @@ async function handleDelete() {
 
       <div v-if="delStep === 'confirm'" class="confirm-box">
         <p style="margin:0 0 .75rem;font-size:.875rem;font-weight:600;color:#7f1d1d;">退会するにはパスワードを入力してください</p>
-        <input v-model="del.password" type="password" class="input" placeholder="パスワード" style="margin-bottom:.75rem;" autocomplete="current-password" />
+        <div style="position:relative;margin-bottom:.75rem;">
+          <input v-model="del.password" :type="showDelPw ? 'text' : 'password'" class="input" placeholder="パスワード" autocomplete="current-password" style="padding-right:2.75rem;" />
+          <button type="button" @click="showDelPw = !showDelPw" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94a3b8;padding:0;display:flex;align-items:center;" :title="showDelPw ? 'パスワードを隠す' : 'パスワードを表示'">
+            <span class="material-icons" style="font-size:1.2rem;">{{ showDelPw ? 'visibility_off' : 'visibility' }}</span>
+          </button>
+        </div>
         <div v-if="delMsg" class="msg-box msg-ng" style="margin-bottom:.75rem;">
           <span class="material-icons" style="font-size:1rem;">error</span>{{ delMsg }}
         </div>

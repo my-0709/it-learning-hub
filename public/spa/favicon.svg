@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="12" fill="url(#g)"/>
+  <!-- school (graduation cap) icon — simplified -->
+  <path d="M24 12 L10 19 L24 26 L38 19 Z" fill="#ffffff"/>
+  <path d="M16 22 L16 31 C16 31 20 35 24 35 C28 35 32 31 32 31 L32 22 L24 26 Z" fill="#ffffff" opacity="0.9"/>
+  <rect x="37" y="19" width="2.5" height="9" rx="1.25" fill="#ffffff" opacity="0.85"/>
+  <circle cx="38.25" cy="29.5" r="2" fill="#ffffff" opacity="0.85"/>
+</svg>
