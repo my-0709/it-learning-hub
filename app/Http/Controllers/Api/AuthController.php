@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Services\AuthService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function __construct(private AuthService $service) {}
+
+    public function register(Request $request): JsonResponse
     {
         $data = $request->validate([
             'name'     => 'required|string|max:100',
@@ -19,40 +19,31 @@ class AuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $user  = User::create([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $result = $this->service->register($data);
 
-        return response()->json(['user' => $user, 'token' => $token], 201);
+        return response()->json($result, 201);
     }
 
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         $data = $request->validate([
             'email'    => 'required|email',
             'password' => 'required|string',
         ]);
 
-        if (!Auth::attempt($data)) {
-            throw ValidationException::withMessages(['email' => 'メールアドレスまたはパスワードが正しくありません。']);
-        }
+        $result = $this->service->login($data['email'], $data['password']);
 
-        $user  = Auth::user();
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json(['user' => $user, 'token' => $token]);
+        return response()->json($result);
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        $this->service->logout($request->user());
+
         return response()->json(['message' => 'ログアウトしました。']);
     }
 
-    public function me(Request $request)
+    public function me(Request $request): JsonResponse
     {
         return response()->json($request->user());
     }

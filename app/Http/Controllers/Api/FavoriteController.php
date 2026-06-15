@@ -3,37 +3,24 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Favorite;
 use App\Models\Term;
+use App\Services\FavoriteService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class FavoriteController extends Controller
 {
-    public function index(Request $request)
+    public function __construct(private FavoriteService $service) {}
+
+    public function index(Request $request): JsonResponse
     {
-        $terms = Term::with(['category', 'tags'])
-            ->whereHas('favoritedBy', fn($q) => $q->where('user_id', $request->user()->id))
-            ->paginate(20);
-
-        $terms->getCollection()->transform(function ($term) {
-            $term->is_favorite = true;
-            return $term;
-        });
-
-        return response()->json($terms);
+        return response()->json($this->service->getList($request->user()->id));
     }
 
-    public function toggle(Request $request, Term $term)
+    public function toggle(Request $request, Term $term): JsonResponse
     {
-        $userId = $request->user()->id;
-        $exists = Favorite::where('user_id', $userId)->where('term_id', $term->id)->first();
+        $isFavorite = $this->service->toggle($request->user()->id, $term->id);
 
-        if ($exists) {
-            $exists->delete();
-            return response()->json(['is_favorite' => false]);
-        }
-
-        Favorite::create(['user_id' => $userId, 'term_id' => $term->id]);
-        return response()->json(['is_favorite' => true]);
+        return response()->json(['is_favorite' => $isFavorite]);
     }
 }
