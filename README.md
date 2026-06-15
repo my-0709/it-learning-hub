@@ -128,6 +128,37 @@ npm run dev
 
 ---
 
+## Railway へのデプロイ
+
+### 前提
+- [Railway](https://railway.app) アカウント
+- GitHub リポジトリ（パブリックまたはプライベート）
+
+### 手順
+
+1. **Railway ダッシュボード** で「New Project」→「Deploy from GitHub repo」を選択
+2. このリポジトリを選択して「Deploy Now」
+3. デプロイ後、「Variables」タブで以下の環境変数を設定：
+
+| 変数名 | 値 |
+|---|---|
+| `APP_ENV` | `production` |
+| `APP_KEY` | `php artisan key:generate --show` の出力値 |
+| `APP_DEBUG` | `false` |
+| `APP_URL` | Railway が発行した URL（例: `https://xxxx.railway.app`） |
+| `SESSION_DRIVER` | `file` |
+| `CACHE_STORE` | `file` |
+
+4. Variables 設定後、Railway が自動で再デプロイ
+5. `https://xxxx.railway.app` にアクセスしてデモアカウントでログイン
+
+### ビルド・起動の仕組み
+
+- **ビルド**: `frontend/` の Vue 3 アプリをビルドして `public/spa/` に出力、その後 Composer で PHP 依存関係をインストール
+- **起動**: SQLite 初期化 → マイグレーション → シーディング → PHP 組み込みサーバー起動
+
+---
+
 ## ディレクトリ構成
 
 ```
