@@ -230,49 +230,88 @@ npm run dev
 
 ---
 
+## バックエンドアーキテクチャ
+
+Controller → Service → Repository の 3 層構造を採用しています。
+
+```
+リクエスト
+    ↓
+Controller          # HTTP の入出力（バリデーション・レスポンス）のみ
+    ↓
+Service             # ビジネスロジック・複数 Repository の調整
+    ↓
+Repository          # Eloquent クエリのみ（Interface で抽象化）
+    ↓
+DB（SQLite）
+```
+
+| 層 | 責務 | 例 |
+|---|---|---|
+| Controller | バリデーション・認可・レスポンス整形 | `QuizController` |
+| Service | ビジネスロジック・複数リポジトリの調整 | `QuizService` |
+| Repository | Eloquent クエリのカプセル化 | `QuizRepository` |
+
+Repository は Interface を経由して DI コンテナにバインドされているため、実装を差し替えてもコントローラ・サービスへの影響がありません。
+
+---
+
 ## ディレクトリ構成
 
 ```
 it-learning-hub/
 ├── app/
-│   ├── Http/Controllers/Api/   # API コントローラ
-│   └── Models/                 # Eloquent モデル
+│   ├── Http/Controllers/Api/       # Controller（HTTP 入出力のみ）
+│   ├── Services/                   # Service（ビジネスロジック）
+│   ├── Repositories/
+│   │   ├── Interfaces/             # Repository Interface（抽象）
+│   │   └── *.php                   # Eloquent 実装
+│   ├── Models/                     # Eloquent モデル
+│   └── Providers/AppServiceProvider.php  # Interface ↔ 実装のバインド
 ├── database/
-│   ├── migrations/             # DB マイグレーション
-│   └── seeders/                # IT 用語シーダー
+│   ├── migrations/                 # DB マイグレーション
+│   └── seeders/                    # IT 用語シーダー
 ├── routes/
-│   └── api.php                 # API ルーティング
-├── frontend/                   # Vue 3 フロントエンド
+│   └── api.php                     # API ルーティング
+├── frontend/                       # Vue 3 フロントエンド
 │   ├── src/
-│   │   ├── pages/              # 各ページコンポーネント
-│   │   ├── stores/             # Pinia ストア
-│   │   ├── layouts/            # レイアウトコンポーネント
-│   │   └── style.css           # グローバルスタイル
+│   │   ├── pages/                  # 各ページコンポーネント
+│   │   ├── stores/                 # Pinia ストア
+│   │   ├── layouts/                # レイアウトコンポーネント
+│   │   └── style.css               # グローバルスタイル
 │   └── vite.config.ts
-└── docs/screenshots/           # アプリのスクリーンショット
+└── docs/screenshots/               # アプリのスクリーンショット
 ```
 
 ---
 
 ## API エンドポイント（主要）
 
-| メソッド | エンドポイント          | 説明             |
-| -------- | ----------------------- | ---------------- |
-| POST     | `/api/login`            | ログイン         |
-| POST     | `/api/register`         | 新規登録         |
-| POST     | `/api/logout`           | ログアウト       |
-| GET      | `/api/terms`            | 用語一覧取得     |
-| GET      | `/api/terms/{id}`       | 用語詳細取得     |
-| GET      | `/api/categories`       | カテゴリ一覧     |
-| POST     | `/api/quiz/start`       | クイズ開始       |
-| POST     | `/api/quiz/{id}/answer` | クイズ回答       |
-| GET      | `/api/history`          | 学習履歴取得     |
-| GET      | `/api/favorites`        | お気に入り一覧   |
-| PUT      | `/api/user/profile`     | プロフィール更新 |
-| POST     | `/api/user/avatar`      | アバター画像更新 |
-| PUT      | `/api/user/password`    | パスワード変更   |
-| DELETE   | `/api/user/history`     | 学習履歴リセット |
-| DELETE   | `/api/user`             | アカウント削除   |
+ベース URL: `/api/v1`
+
+| メソッド | エンドポイント                        | 認証 | 説明             |
+| -------- | ------------------------------------- | ---- | ---------------- |
+| POST     | `/auth/register`                      |      | 新規登録         |
+| POST     | `/auth/login`                         |      | ログイン         |
+| POST     | `/auth/logout`                        | ✓    | ログアウト       |
+| GET      | `/auth/me`                            | ✓    | 認証ユーザー取得 |
+| GET      | `/categories`                         |      | カテゴリ一覧     |
+| GET      | `/terms`                              |      | 用語一覧（フィルタ対応）|
+| GET      | `/terms/{id}`                         |      | 用語詳細         |
+| GET      | `/quizzes/random`                     |      | ランダムクイズ取得|
+| POST     | `/quiz-sessions`                      | ✓    | クイズセッション開始|
+| POST     | `/quiz-sessions/{id}/answer`          | ✓    | クイズ回答       |
+| POST     | `/quiz-sessions/{id}/end`             | ✓    | クイズセッション終了|
+| GET      | `/learning-records`                   | ✓    | 学習履歴取得     |
+| GET      | `/learning-records/stats`             | ✓    | 学習統計取得     |
+| GET      | `/favorites`                          | ✓    | お気に入り一覧   |
+| POST     | `/favorites/{termId}`                 | ✓    | お気に入りトグル |
+| GET      | `/weak-points`                        | ✓    | 苦手分析取得     |
+| PUT      | `/user/profile`                       | ✓    | プロフィール更新 |
+| POST     | `/user/avatar`                        | ✓    | アバター画像更新 |
+| PUT      | `/user/password`                      | ✓    | パスワード変更   |
+| DELETE   | `/user/history`                       | ✓    | 学習履歴リセット |
+| DELETE   | `/user`                               | ✓    | アカウント削除   |
 
 ---
 
