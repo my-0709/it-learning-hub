@@ -1,5 +1,7 @@
 # IT Learning Hub
 
+**デモ**: https://it-learning-hub-production.up.railway.app
+
 IT エンジニアを目指す学習者のための **IT 用語学習 Web アプリ**です。  
 クイズ・単語帳・学習履歴・苦手分析など、効率的に IT 用語を習得できる機能を揃えています。
 
