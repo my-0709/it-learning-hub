@@ -4,14 +4,8 @@ set -e
 # マイグレーション
 php artisan migrate --force
 
-# terms テーブルが空の場合のみシード（初回デプロイ時のみ実行）
-TERM_COUNT=$(php artisan tinker --execute="echo \DB::table('terms')->count();" 2>/dev/null | grep -E '^[0-9]+$' | head -1)
-if [ -z "$TERM_COUNT" ] || [ "$TERM_COUNT" -eq "0" ]; then
-  echo "Seeding database..."
-  php artisan db:seed --force
-else
-  echo "Database already has $TERM_COUNT terms, skipping seed."
-fi
+# シード（DatabaseSeeder 内で重複チェック済み、再デプロイ時は既存データを保持）
+php artisan db:seed --force
 
 # ストレージリンク
 php artisan storage:link || true
