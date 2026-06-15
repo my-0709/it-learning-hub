@@ -5,8 +5,8 @@ import { useAuthStore } from '@/stores/auth'
 
 const auth    = useAuthStore()
 const router  = useRouter()
-const email   = ref('demo@example.com')
-const password= ref('password')
+const email   = ref('')
+const password= ref('')
 const error   = ref('')
 const loading = ref(false)
 
@@ -76,9 +76,6 @@ async function submit() {
           </p>
         </div>
 
-        <div style="margin-top:1rem;padding:.75rem;background:#f0f9ff;border-radius:.75rem;font-size:.8rem;color:#64748b;text-align:center;">
-          デモ: demo@example.com / password
-        </div>
       </div>
     </div>
   </div>
