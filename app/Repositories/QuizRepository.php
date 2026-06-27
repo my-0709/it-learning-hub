@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 
 class QuizRepository implements QuizRepositoryInterface
 {
-    public function findRandom(?int $categoryId, ?Collection $weakQuizIds): ?Quiz
+    public function findRandom(?int $categoryId, ?Collection $weakQuizIds, array $excludeIds = []): ?Quiz
     {
         $query = Quiz::with(['term.category', 'choices'])
             ->when($categoryId, fn($q) => $q->whereHas(
@@ -18,6 +18,10 @@ class QuizRepository implements QuizRepositoryInterface
 
         if ($weakQuizIds && $weakQuizIds->isNotEmpty()) {
             $query->whereIn('id', $weakQuizIds);
+        }
+
+        if (!empty($excludeIds)) {
+            $query->whereNotIn('id', $excludeIds);
         }
 
         $quiz = $query->inRandomOrder()->first();

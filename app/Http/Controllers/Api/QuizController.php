@@ -14,10 +14,13 @@ class QuizController extends Controller
 
     public function random(Request $request): JsonResponse
     {
+        $excludeIds = array_filter(array_map('intval', (array) $request->input('exclude_ids', [])));
+
         $quiz = $this->service->getRandom(
             $request->integer('category_id') ?: null,
             (bool) $request->input('weak_mode'),
-            $request->user()?->id
+            $request->user()?->id,
+            array_values($excludeIds)
         );
 
         if (!$quiz) {

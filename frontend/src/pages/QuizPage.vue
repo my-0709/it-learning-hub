@@ -7,16 +7,17 @@ const route = useRoute()
 
 type Phase = 'setup' | 'quiz' | 'answered' | 'finished'
 
-const phase      = ref<Phase>('setup')
-const categories = ref<any[]>([])
-const selCat     = ref(route.query.category_id as string ?? '')
-const weakMode   = ref(false)
-const sessionId  = ref<number | null>(null)
-const quiz       = ref<any>(null)
-const result     = ref<any>(null)
-const score      = ref({ total: 0, correct: 0 })
-const loadingQ   = ref(false)
-const startTime  = ref(0)
+const phase       = ref<Phase>('setup')
+const categories  = ref<any[]>([])
+const selCat      = ref(route.query.category_id as string ?? '')
+const weakMode    = ref(false)
+const sessionId   = ref<number | null>(null)
+const quiz        = ref<any>(null)
+const result      = ref<any>(null)
+const score       = ref({ total: 0, correct: 0 })
+const loadingQ    = ref(false)
+const startTime   = ref(0)
+const answeredIds = ref<number[]>([])
 
 onMounted(async () => {
   const { data } = await api.get('/categories')
@@ -25,8 +26,9 @@ onMounted(async () => {
 
 async function startQuiz() {
   const { data } = await api.post('/quiz-sessions', { category_id: selCat.value || null })
-  sessionId.value = data.id
-  score.value     = { total: 0, correct: 0 }
+  sessionId.value  = data.id
+  score.value      = { total: 0, correct: 0 }
+  answeredIds.value = []
   await nextQuestion()
   phase.value = 'quiz'
 }
@@ -35,13 +37,18 @@ async function nextQuestion() {
   loadingQ.value = true
   try {
     const { data } = await api.get('/quizzes/random', {
-      params: { category_id: selCat.value || undefined, weak_mode: weakMode.value ? 1 : undefined }
+      params: {
+        category_id: selCat.value || undefined,
+        weak_mode:   weakMode.value ? 1 : undefined,
+        exclude_ids: answeredIds.value.length ? answeredIds.value : undefined,
+      },
     })
-    quiz.value   = data
-    result.value = null
-    phase.value  = 'quiz'
+    quiz.value      = data
+    result.value    = null
+    phase.value     = 'quiz'
     startTime.value = Date.now()
   } catch {
+    // 問題がなくなった（404）または取得失敗 → 終了
     await endQuiz()
   } finally {
     loadingQ.value = false
@@ -59,6 +66,7 @@ async function answer(choiceId: number) {
   result.value = data
   score.value.total++
   if (data.is_correct) score.value.correct++
+  answeredIds.value = [...answeredIds.value, quiz.value.id]
   phase.value = 'answered'
 }
 
@@ -141,9 +149,12 @@ async function endQuiz() {
             </div>
             <p style="margin:0;font-size:.85rem;line-height:1.6;">{{ result.explanation }}</p>
           </div>
-          <button class="btn-primary" style="width:100%;justify-content:center;display:flex;align-items:center;gap:.4rem;margin-top:.75rem;" @click="nextQuestion">
-            次の問題へ
-            <span class="material-icons" style="font-size:1.1rem;">arrow_forward</span>
+          <button v-if="!loadingQ" class="btn-primary" style="width:100%;justify-content:center;display:flex;align-items:center;gap:.4rem;margin-top:.75rem;" @click="nextQuestion">
+            <span v-if="loadingQ" class="material-icons" style="font-size:1.1rem;animation:spin 1s linear infinite;">hourglass_empty</span>
+            <template v-else>
+              次の問題へ
+              <span class="material-icons" style="font-size:1.1rem;">arrow_forward</span>
+            </template>
           </button>
         </div>
       </div>

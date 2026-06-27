@@ -16,7 +16,7 @@ class QuizService
         private LearningRecordRepositoryInterface $recordRepository
     ) {}
 
-    public function getRandom(?int $categoryId, bool $weakMode, ?int $userId): ?Quiz
+    public function getRandom(?int $categoryId, bool $weakMode, ?int $userId, array $excludeIds = []): ?Quiz
     {
         $weakQuizIds = null;
 
@@ -25,7 +25,7 @@ class QuizService
             $weakQuizIds = $ids->isNotEmpty() ? $ids : null;
         }
 
-        return $this->quizRepository->findRandom($categoryId, $weakQuizIds);
+        return $this->quizRepository->findRandom($categoryId, $weakQuizIds, $excludeIds);
     }
 
     public function startSession(int $userId, ?int $categoryId): QuizSession
